@@ -8,7 +8,7 @@ from typing import List
 
 from uuid import UUID
 
-from src.config import get_current_user_id
+from src.config import get_current_user_id, ADMIN_USER_ID
 from src.database import get_db
 from src.model.exercise import Exercise
 from src.schemas.exercise import ExerciseCreate, ExerciseUpdate, ExerciseOut
@@ -79,7 +79,7 @@ def add_multiple(
     db: Session = Depends(get_db),
     current_user_id: str = Depends(get_current_user_id),
 ):
-    if current_user_id != "8577d8de-fabb-45e9-abb2-754fc18ef928":
+    if current_user_id != ADMIN_USER_ID:
         raise HTTPException(
             status_code=403, detail="No tienes permiso para este endpoint"
         )
