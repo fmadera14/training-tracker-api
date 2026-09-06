@@ -11,6 +11,8 @@ from uuid import UUID
 from src.config import get_current_user_id
 from src.database import get_db
 from src.model.routine import Routine
+from src.model.routine_day import RoutineDay
+from src.model.routine_exercise import RoutineExercise
 from src.schemas.routine import RoutineCreate, RoutineUpdate, RoutineOut
 
 router = APIRouter(prefix="/routine", tags=["routine"])
@@ -51,6 +53,51 @@ def create_routine(
     db.commit()
     db.refresh(new_routine)
     return new_routine
+
+
+@router.post(
+    "/duplicate/{routine_id}",
+    response_model=RoutineOut,
+    status_code=status.HTTP_201_CREATED,
+)
+def duplicate_routine(
+    routine_id: str,
+    db: Session = Depends(get_db),
+    current_user_id: Session = Depends(get_current_user_id),
+):
+    routine_to_duplicate = (
+        db.query(Routine)
+        .filter(and_(Routine.id == routine_id, Routine.user_id == current_user_id))
+        .first()
+    )
+
+    duplicated_routine = Routine(
+        name=routine_to_duplicate.name + "(Copy)",
+        description=routine_to_duplicate.description,
+        user_id=routine_to_duplicate.user_id,
+    )
+    db.add(duplicated_routine)
+    db.commit()
+    db.refresh(duplicated_routine)
+
+    # create routine_days
+    routine_days: list[RoutineDay] = routine_to_duplicate.days
+    for day in routine_days:
+        day_copy = RoutineDay(
+            routine_id=duplicated_routine.id,
+            name=day.name,
+            day_order=day.day_order,
+        )
+        db.add(day_copy)
+        db.commit()
+        db.refresh(day_copy)
+
+        # TODO: create routine_exercises
+        routine_exercises: list[RoutineExercise] = day.exercises
+        for exercise in routine_exercises:
+            continue
+
+    return duplicated_routine
 
 
 @router.patch("/{routine_id}", response_model=RoutineOut)

@@ -126,7 +126,7 @@ def reorder_routine_exercises(
         .all()
     )
     existing_ids = {re.id for re in existing_exercises}
-    incoming_ids = set(reorder_data.routine_exercise_ids)
+    incoming_ids = set(reorder_data.exercise_ids)
 
     if existing_ids != incoming_ids:
         raise HTTPException(
@@ -136,9 +136,7 @@ def reorder_routine_exercises(
 
     exercises_by_id = {re.id: re for re in existing_exercises}
 
-    for index, routine_exercise_id in enumerate(
-        reorder_data.routine_exercise_ids, start=1
-    ):
+    for index, routine_exercise_id in enumerate(reorder_data.exercise_ids, start=1):
         exercises_by_id[routine_exercise_id].exercise_order = index
 
     db.commit()
