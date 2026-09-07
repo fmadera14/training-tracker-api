@@ -95,7 +95,17 @@ def duplicate_routine(
         # TODO: create routine_exercises
         routine_exercises: list[RoutineExercise] = day.exercises
         for exercise in routine_exercises:
-            continue
+            exercise_copy = RoutineExercise(
+                routine_day_id=day_copy.id,
+                exercise_id=exercise.exercise_id,
+                target_sets=exercise.target_sets,
+                target_reps=exercise.target_reps,
+                target_weight=exercise.target_weight,
+                exercise_order=exercise.exercise_order,
+                notes=exercise.notes,
+            )
+            db.add(exercise_copy)
+            db.commit()
 
     return duplicated_routine
 
